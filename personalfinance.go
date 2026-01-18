@@ -1,31 +1,34 @@
 package main
-//packages
+
 import (
-	"fmt"
 	"bufio"
+	"fmt"
 	"os"
 	"strconv"
 	"strings"
 	"time"
 )
-//set Expense type
+
 type Expense struct {
 	Description string
-	Amount float64
-	Category string
-	Date time.Time
+	Amount      float64
+	Category    string
+	Date        time.Time
 }
+
 func clearTerminal() {
 	fmt.Print("\033[H\033[2J")
 }
-func showMenu () {
-	fmt.Println("\n", strings.Repeat("=", 36))
-	fmt.Println(strings.Repeat(" ", 6), "Personal Finance - CLI")
-	fmt.Println(strings.Repeat("=", 36))
-	fmt.Println("  \n" + "1 | Add Expense\n" + "2 | List Expenses \n" + "3 | View Total Expenses")
-	fmt.Println("\n 4 | Filter by Category \n" + "5 | Filter by Date \n" + "0 | Exit")
-	fmt.Println("\n", strings.Repeat("=", 36), "\n Select an option: ")
+
+func showMenu() {
+	fmt.Println(strings.Repeat("\033[1;36m=\033[0m", 36))
+	fmt.Println(strings.Repeat(" ", 6), "\033[1;36mPersonal Finance - CLI\033[0m")
+	fmt.Println(strings.Repeat("\033[1;36m=\033[0m", 36))
+	fmt.Println("\n\033[1;36m1 | Add Expense \n2 | List Expenses \n3 | View Total Expenses\033[0m")
+	fmt.Println("\n\033[1;36m4 | Filter by Category \n5 | Filter by Date \n0 | Exit\033[0m \n")
+	fmt.Println(strings.Repeat("\033[1;36m=\033[0m", 36), "\n\033[1;36mSelect an option: \033[0m")
 }
+
 func readExpense(reader *bufio.Reader) (Expense, error) {
 	var expense Expense
 
@@ -57,53 +60,79 @@ func readExpense(reader *bufio.Reader) (Expense, error) {
 
 	return expense, nil
 }
-func listExpenses (expenses []Expense)  {
-	var option string
+
+func listExpenses(expenses []Expense, reader *bufio.Reader) {
 	if len(expenses) == 0 {
-		fmt.Println("No expenses found.")
+		fmt.Println("[No expenses found.")
 	}
 	fmt.Println("\033[1;34m============== ALL EXPENSES ==============\033[0m")
-		for i, expense := range expenses {
-			fmt.Printf("%d | %s | %.2f | %s | %s", i+1, expense.Description, expense.Amount, expense.Category, expense.Date.Format("02/01/2006"))
-			fmt.Println("\nOptions:" + "\n R | Refresh List" + "\n V | Back to Main Menu")
-			fmt.Print("Choose an Option: ")
-			fmt.Scanln(&option)
-			switch option {
-		 		case "R", "r":
-			 		continue
-		 		case "V", "v":
-			 			return
-		}
-
-
+	for i, expense := range expenses {
+		fmt.Printf(
+			"\033[1;36m%d | %s | %.2f | %s | %s \033[0m",
+			i+1,
+			expense.Description,
+			expense.Amount,
+			expense.Category,
+			expense.Date.Format("02/01/2006"),
+		)
+		fmt.Println("\nOptions:\nR | Refresh List\nV | Back to Main Menu")
+		fmt.Print("Choose an Option: ")
+		text, _ := reader.ReadString('\n')
+		option := strings.TrimSpace(text)
+		switch option {
+		case "R", "r":
+			continue
+		case "V", "v":
+			return
+		default:
+			continue
 		}
 	}
-func main () {
- reader := bufio.NewReader(os.Stdin)
+}
+
+func totalExpenses(expenses []Expense, reader *bufio.Reader) {
+	var option string
+	var total float64 = 0.0
+	for _, expense := range expenses {
+		total += expense.Amount
+	}
+	fmt.Printf("Total Expenses: %.2f \n", total)
+	fmt.Println("Option: 1 | Exit ")
+	fmt.Print("Enter Option: ")
+	text, _ := reader.ReadString('\n')
+	option = strings.TrimSpace(text)
+	switch option {
+	case "1":
+		return
+	default:
+		return
+	}
+}
+
+func main() {
+	reader := bufio.NewReader(os.Stdin)
 	var expenses []Expense
-  var running bool = true
+	var running bool = true
 	for running == true {
 		clearTerminal()
 		showMenu()
 		input, _ := reader.ReadString('\n')
 		input = strings.TrimSpace(input)
 		switch input {
-			case "1":
-				expense, err := readExpense(reader)
-				if err != nil {
+		case "1":
+			expense, err := readExpense(reader)
+			if err != nil {
 				fmt.Println("Error adding expense:", err)
 				break
-				}
-				expenses = append(expenses, expense)
-				fmt.Println("Expense added successfully")
-			case "2":
-				clearTerminal()
-				listExpenses(expenses)
-			case "0":
-				running = false
+			}
+			expenses = append(expenses, expense)
+		case "2":
+			clearTerminal()
+			listExpenses(expenses, reader)
+		case "3":
+			totalExpenses(expenses, reader)
+		case "0":
+			running = false
 		}
-
-
 	}
-
 }
