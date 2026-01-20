@@ -109,6 +109,42 @@ func totalExpenses(expenses []Expense, reader *bufio.Reader) {
 	}
 }
 
+func filterCategory(expenses []Expense, reader *bufio.Reader) {
+	if len(expenses) == 0 {
+		fmt.Println("No expenses found.")
+		return
+	}
+	fmt.Println("Enter category to filter: ")
+	text, _ := reader.ReadString('\n')
+	category := strings.TrimSpace(strings.ToLower(text))
+	fmt.Println("\nFiltered Expenses: \n")
+	found := false
+	for _, expense := range expenses {
+		if strings.ToLower(expense.Category) == category {
+			fmt.Printf(
+				"%s | %.2f | %s | %s\n",
+				expense.Description,
+				expense.Amount,
+				expense.Category,
+				expense.Date.Format("02/01/2006"),
+			)
+			found = true
+		}
+	}
+	if !found {
+		fmt.Println("No expenses found for this category")
+	}
+	fmt.Println("Option: \n 1 | Exit \n Enter Option: ")
+	text2, _ := reader.ReadString('\n')
+	option := strings.TrimSpace(text2)
+	switch option {
+	case "1":
+		return
+	default:
+		return
+	}
+}
+
 func main() {
 	reader := bufio.NewReader(os.Stdin)
 	var expenses []Expense
@@ -131,6 +167,8 @@ func main() {
 			listExpenses(expenses, reader)
 		case "3":
 			totalExpenses(expenses, reader)
+		case "4":
+			filterCategory(expenses, reader)
 		case "0":
 			running = false
 		}
