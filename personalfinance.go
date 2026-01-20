@@ -134,7 +134,7 @@ func filterCategory(expenses []Expense, reader *bufio.Reader) {
 	if !found {
 		fmt.Println("No expenses found for this category")
 	}
-	fmt.Println("Option: \n 1 | Exit \n Enter Option: ")
+	fmt.Println("Option: \n 1 | Exit \n Enter option: ")
 	text2, _ := reader.ReadString('\n')
 	option := strings.TrimSpace(text2)
 	switch option {
@@ -142,6 +142,47 @@ func filterCategory(expenses []Expense, reader *bufio.Reader) {
 		return
 	default:
 		return
+	}
+}
+
+func filterDate(expenses []Expense, reader *bufio.Reader) {
+	if len(expenses) == 0 {
+		fmt.Println("No expenses found.")
+		return
+	}
+	fmt.Println("Enter date to filter:")
+	strDate, _ := reader.ReadString('\n')
+	strDate = strings.TrimSpace(strDate)
+	dateFilter, err := time.Parse("2006-01-02", strDate)
+	if err != nil {
+		fmt.Println("Invalid date format")
+		return
+	}
+	found := false
+	for _, expense := range expenses {
+		if expense.Date.Format("2006-01-02") == dateFilter.Format("2006-01-02"){
+			fmt.Printf(
+				"%s | %.2f | %s | %s\n",
+				expense.Description,
+				expense.Amount,
+				expense.Category,
+				expense.Date.Format("01/02/2006"),
+			)
+			found = true
+		}
+	}
+	if !found {
+		fmt.Println("No expenses found for this date.")
+	}
+	fmt.Println("Option:\n1 | Exit\nEnter option ")
+	text3, _ := reader.ReadString('\n')
+	option := strings.TrimSpace(text3)
+	switch option {
+	case "1":
+		return
+	default:
+		return
+
 	}
 }
 
@@ -169,6 +210,8 @@ func main() {
 			totalExpenses(expenses, reader)
 		case "4":
 			filterCategory(expenses, reader)
+		case "5":
+			filterDate(expenses, reader)
 		case "0":
 			running = false
 		}
